@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Route, Routes } from 'react-router-dom'
+import { NavLink, Route, Routes, Navigate } from 'react-router-dom'
 import { db, purgePlansWithoutDates, seedPlansFromImport } from './data/db'
 import Dashboard from './pages/Dashboard'
 import PlanDetail from './pages/PlanDetail'
@@ -25,15 +25,18 @@ const App = () => {
     })
   }, [])
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [authReady, setAuthReady] = useState(false)
   const [syncState, setSyncState] = useState<'idle' | 'syncing' | 'ok' | 'error'>('idle')
   const debounceRef = useRef<number | null>(null)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUserEmail(data.user?.email ?? null)
+    supabase.auth.getSession().then(({ data }) => {
+      setUserEmail(data.session?.user?.email ?? null)
+      setAuthReady(true)
     })
     const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
       setUserEmail(session?.user?.email ?? null)
+      setAuthReady(true)
     })
     return () => {
       sub?.subscription?.unsubscribe?.()
@@ -70,6 +73,21 @@ const App = () => {
         .join('')
         .slice(0, 2)
     : '—'
+
+  const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+    if (!authReady) {
+      return (
+        <div className="section">
+          <div className="card">
+            <div className="section-title">Loading</div>
+            <div className="muted">Checking your session…</div>
+          </div>
+        </div>
+      )
+    }
+    if (!userEmail) return <Navigate to="/auth" replace />
+    return <>{children}</>
+  }
 
   return (
     <div className="app-shell">
@@ -111,14 +129,63 @@ const App = () => {
       <main className="content">
         <ErrorBoundary>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/plan/:planId" element={<PlanDetail />} />
-            <Route path="/session/:sessionId" element={<SessionDetail />} />
-            <Route path="/workout/:workoutId" element={<WorkoutRun />} />
-            <Route path="/calendar" element={<CalendarView />} />
-            <Route path="/plans" element={<MyPlan />} />
-            <Route path="/progress" element={<ProgressView />} />
             <Route path="/auth" element={<Auth />} />
+            <Route
+              path="/"
+              element={
+                <RequireAuth>
+                  <Dashboard />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/plan/:planId"
+              element={
+                <RequireAuth>
+                  <PlanDetail />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/session/:sessionId"
+              element={
+                <RequireAuth>
+                  <SessionDetail />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/workout/:workoutId"
+              element={
+                <RequireAuth>
+                  <WorkoutRun />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <RequireAuth>
+                  <CalendarView />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/plans"
+              element={
+                <RequireAuth>
+                  <MyPlan />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/progress"
+              element={
+                <RequireAuth>
+                  <ProgressView />
+                </RequireAuth>
+              }
+            />
           </Routes>
         </ErrorBoundary>
       </main>
