@@ -264,12 +264,7 @@ export const purgePlansWithoutDates = async () => {
   const planIds = targets.map((plan) => plan.id)
   await db.transaction(
     'rw',
-    db.plans,
-    db.sessions,
-    db.exercises,
-    db.plannedWorkouts,
-    db.workouts,
-    db.exerciseLogs,
+    [db.plans, db.sessions, db.exercises, db.plannedWorkouts, db.workouts, db.exerciseLogs],
     async () => {
       const sessions = await db.sessions.where('planId').anyOf(planIds).toArray()
       const sessionIds = sessions.map((session) => session.id)

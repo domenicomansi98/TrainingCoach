@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate, useParams } from 'react-router-dom'
 import { db } from '../data/db'
@@ -27,10 +27,12 @@ const SessionDetail = () => {
   useEffect(() => {
     if (plan?.currentWeek) setSelectedWeek(plan.currentWeek)
   }, [plan?.currentWeek])
-  const currentWeekKey = useMemo(
-    () => `week${selectedWeek}` as const,
-    [selectedWeek]
-  )
+  const getWeekValue = (exercise: { week1?: string | null; week2?: string | null; week3?: string | null; week4?: string | null }) => {
+    if (selectedWeek === 1) return exercise.week1
+    if (selectedWeek === 2) return exercise.week2
+    if (selectedWeek === 3) return exercise.week3
+    return exercise.week4
+  }
 
   if (!session || !plan)
     return (
@@ -114,7 +116,7 @@ const SessionDetail = () => {
         {exercises?.map((exercise) => (
           <div key={exercise.id} className="card">
             <div className="section-title">{exercise.name}</div>
-            <div className="muted">{exercise[currentWeekKey] ?? '-'}</div>
+            <div className="muted">{getWeekValue(exercise) ?? '-'}</div>
             <div className="row">
               <div style={{ flex: 1 }}>
                 <label>Sets</label>

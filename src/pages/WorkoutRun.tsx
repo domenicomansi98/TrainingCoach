@@ -51,7 +51,17 @@ const WorkoutRun = () => {
   }, [plan?.currentWeek])
 
   if (!workout || !session || !plan) return <div>Loading workout...</div>
-  const currentWeekKey = `week${selectedWeek}` as const
+  const getWeekValue = (exercise: {
+    week1?: string | null
+    week2?: string | null
+    week3?: string | null
+    week4?: string | null
+  }) => {
+    if (selectedWeek === 1) return exercise.week1
+    if (selectedWeek === 2) return exercise.week2
+    if (selectedWeek === 3) return exercise.week3
+    return exercise.week4
+  }
 
   const upsertLog = async (
     exerciseId: string,
@@ -147,7 +157,7 @@ const WorkoutRun = () => {
           return (
             <div className="card" key={exercise.id}>
               <div className="section-title">{exercise.name}</div>
-              <div className="muted">{exercise[currentWeekKey] ?? '-'}</div>
+              <div className="muted">{getWeekValue(exercise) ?? '-'}</div>
               <div className="sets">
                 {sets.map((_, idx) => (
                   <button

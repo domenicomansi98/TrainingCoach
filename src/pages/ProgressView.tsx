@@ -266,26 +266,29 @@ const ProgressView = () => {
     : []
 
   const aggregateSeries = useMemo(() => {
-    const map = new Map<string, { date: string; load: number; weightAvg: number; count: number }>()
+    const map = new Map<
+      string,
+      { date: string; load: number; weightSum: number; weightCount: number }
+    >()
     loadSeries.clusterList.forEach((cluster) => {
       cluster.entries.forEach((entry) => {
         const key = new Date(entry.date).toDateString()
         const existing = map.get(key) ?? {
           date: entry.date,
           load: 0,
-          weightAvg: 0,
-          count: 0
+          weightSum: 0,
+          weightCount: 0
         }
         existing.load += entry.load
-        existing.weightAvg += entry.weightAvg
-        existing.count += 1
+        existing.weightSum += entry.weightAvg
+        existing.weightCount += 1
         map.set(key, existing)
       })
     })
     return Array.from(map.values())
       .map((entry) => ({
         ...entry,
-        weightAvg: entry.count ? entry.weightAvg / entry.count : 0
+        weightAvg: entry.weightCount ? entry.weightSum / entry.weightCount : 0
       }))
       .sort((a, b) => (a.date > b.date ? 1 : -1))
   }, [loadSeries.clusterList])

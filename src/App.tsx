@@ -24,7 +24,6 @@ const App = () => {
       }
     })
   }, [])
-  const [syncMessage, setSyncMessage] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [syncState, setSyncState] = useState<'idle' | 'syncing' | 'ok' | 'error'>('idle')
   const debounceRef = useRef<number | null>(null)
@@ -104,7 +103,6 @@ const App = () => {
             {syncState === 'error' && 'Sync paused'}
             {syncState === 'idle' && 'Auto-Sync On'}
           </div>
-          {syncMessage && <div className="sync-pill">{syncMessage}</div>}
           <NavLink to="/auth" className="user-chip">
             {initials}
           </NavLink>
