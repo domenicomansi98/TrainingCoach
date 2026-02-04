@@ -33,14 +33,6 @@ const SessionDetail = () => {
     if (selectedWeek === 3) return exercise.week3
     return exercise.week4
   }
-  const parseReps = (text?: string | null) => {
-    if (!text) return null
-    const match = text.replace(',', '.').match(/x\s*(\d+)(?:\s*-\s*(\d+))?/i)
-    if (!match) return null
-    const a = Number(match[1])
-    const b = match[2] ? Number(match[2]) : a
-    return match[2] ? `${a}-${b}` : `${a}`
-  }
 
   if (!session || !plan)
     return (

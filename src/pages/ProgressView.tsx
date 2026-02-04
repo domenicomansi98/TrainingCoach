@@ -275,8 +275,8 @@ const ProgressView = () => {
     const xStep = Math.max(1, Math.ceil(labels.length / 5))
     const formatDate = (label: string) => {
       if (label.includes('-')) {
-        const [y, m, d] = label.split('-')
-        return `${d}/${m}`
+        const parts = label.split('-')
+        return `${parts[2]}/${parts[1]}`
       }
       const parts = label.split('/')
       if (parts.length === 3) return `${parts[0]}/${parts[1]}`
