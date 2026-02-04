@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Route, Routes, Navigate } from 'react-router-dom'
-import { db, purgePlansWithoutDates, seedPlansFromImport } from './data/db'
+import {
+  db,
+  normalizeDynamicPlanState,
+  purgeDuplicatePlansByName,
+  purgePlansWithoutDates,
+  seedPlansFromImport
+} from './data/db'
 import Dashboard from './pages/Dashboard'
 import PlanDetail from './pages/PlanDetail'
 import SessionDetail from './pages/SessionDetail'
@@ -23,6 +29,13 @@ const App = () => {
           localStorage.setItem(flag, 'true')
         })
       }
+      const dupFlag = 'purgedDuplicatePlansV2'
+      if (!localStorage.getItem(dupFlag)) {
+        purgeDuplicatePlansByName().then(() => {
+          localStorage.setItem(dupFlag, 'true')
+        })
+      }
+      normalizeDynamicPlanState()
     })
   }, [])
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -196,23 +209,23 @@ const App = () => {
       {userEmail && (
         <nav className="bottom-nav">
           <NavLink to="/home" end className="bottom-link">
-            <span className="icon">●</span>
+            <span className="icon">🏠</span>
             Home
           </NavLink>
           <NavLink to="/calendar" className="bottom-link">
-            <span className="icon">●</span>
+            <span className="icon">📅</span>
             Calendar
           </NavLink>
           <NavLink to="/plans" className="bottom-link">
-            <span className="icon">●</span>
+            <span className="icon">📋</span>
             My Plan
           </NavLink>
           <NavLink to="/progress" className="bottom-link">
-            <span className="icon">●</span>
+            <span className="icon">📈</span>
             Progress
           </NavLink>
           <NavLink to="/auth" className="bottom-link">
-            <span className="icon">●</span>
+            <span className="icon">👤</span>
             Account
           </NavLink>
         </nav>

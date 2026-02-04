@@ -23,15 +23,20 @@ const MyPlan = () => {
     const endDate = new Date(`${end}T00:00:00`)
     return `${startDate.toLocaleDateString()} – ${endDate.toLocaleDateString()}`
   }
+  const isNotStarted = currentPlan && !currentPlan.startDate
 
   return (
     <div className="section">
-      <div className="glass-card">
-        <div className="toolbar">
+      <div className="hero hero-dark">
+        <div className="hero-content">
           <div>
             <div className="pill">My plan</div>
-            <h1>Current plan</h1>
-            <div className="muted">Review this month and browse your history.</div>
+            <div className="hero-title">Current plan</div>
+            <div className="muted">
+              {isNotStarted
+                ? 'Program not started yet. Start your first workout to set the start date.'
+                : 'Review this month and browse your history.'}
+            </div>
           </div>
           {currentPlan && (
             <Link className="button primary" to={`/plan/${currentPlan.id}`}>
@@ -40,13 +45,13 @@ const MyPlan = () => {
           )}
         </div>
         {currentPlan ? (
-          <div className="widget-grid">
-            <div className="widget gradient-widget stat-variant-a">
+          <div className="hero-stats">
+            <div className="stat-card gradient-widget stat-variant-a">
               <div className="widget-title">Active plan</div>
               <div className="widget-value">{currentPlan.name}</div>
               <div className="muted">{formatRange(currentPlan.startDate, currentPlan.endDate)}</div>
             </div>
-            <div className="widget gradient-widget stat-variant-b">
+            <div className="stat-card gradient-widget stat-variant-b">
               <div className="widget-title">Current week</div>
               <div className="widget-value">Week {currentPlan.currentWeek}</div>
             </div>

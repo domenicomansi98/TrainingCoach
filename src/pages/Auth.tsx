@@ -42,65 +42,63 @@ const Auth = () => {
   const syncState = useLiveQuery(() => db.syncState.get('main'), [])
 
   return (
-    <div className="section">
-      <div className="glass-card">
-        <div>
-          <div className="pill">Account</div>
-          <h1>Sync your data</h1>
-          <div className="muted">Sign in to keep workouts synced across devices.</div>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="pill">Login</div>
+          <h1>{userEmail ? 'Account overview' : 'Welcome back'}</h1>
+          <p className="muted">
+            {userEmail
+              ? 'Your data is synced and secure.'
+              : 'Sign in to access your training plans and sync your progress.'}
+          </p>
         </div>
-      </div>
 
-      <div className="card" style={{ maxWidth: 560, alignSelf: 'center', width: '100%' }}>
         {userEmail ? (
-          <div className="section">
-            <div className="widget-grid">
-              <div className="widget gradient-widget stat-variant-a">
-                <div className="widget-title">Signed in</div>
-                <div className="widget-value value-small">{userEmail}</div>
-              </div>
-              <div className="widget gradient-widget stat-variant-b">
-                <div className="widget-title">User ID</div>
-                <div className="widget-value value-small">{userId ?? '—'}</div>
-              </div>
-              <div className="widget gradient-widget stat-variant-c">
-                <div className="widget-title">Last sync</div>
-                <div className="widget-value">
-                  {syncState?.lastSync
-                    ? new Date(syncState.lastSync).toLocaleString()
-                    : '—'}
-                </div>
+          <div className="auth-profile">
+            <div className="profile-pill">
+              <div className="profile-label">Signed in as</div>
+              <div className="profile-value">{userEmail}</div>
+            </div>
+            <div className="profile-pill">
+              <div className="profile-label">User ID</div>
+              <div className="profile-value value-small">{userId ?? '—'}</div>
+            </div>
+            <div className="profile-pill">
+              <div className="profile-label">Last sync</div>
+              <div className="profile-value">
+                {syncState?.lastSync ? new Date(syncState.lastSync).toLocaleString() : '—'}
               </div>
             </div>
-            <div className="row">
-              <button className="button ghost" onClick={signOut}>
-                Sign Out
-              </button>
-            </div>
+            <button className="button ghost" onClick={signOut}>
+              Sign Out
+            </button>
           </div>
         ) : (
           <>
-            <div className="row">
-              <div style={{ flex: 1 }}>
-                <label>Email</label>
-                <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label>Password</label>
-                <input
-                  className="input"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
+            <div className="auth-form">
+              <label>Email</label>
+              <input
+                className="input auth-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@email.com"
+              />
+              <label>Password</label>
+              <input
+                className="input auth-input"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
             </div>
-            <div className="row">
+            <div className="auth-actions">
               <button className="button primary" onClick={signIn}>
-                Sign In
+                Login
               </button>
               <button className="button secondary" onClick={signUp}>
-                Create Account
+                Register
               </button>
             </div>
           </>

@@ -1,68 +1,45 @@
 import { Link } from 'react-router-dom'
 
 const Landing = () => (
-  <div className="section">
-    <div className="glass-card hero">
-      <div className="toolbar">
-        <div>
-          <div className="pill">Workout Planner</div>
-          <div className="hero-title">Train smarter. Track everything.</div>
-          <div className="muted">
-            Sign in to access your personalized plans, sessions, and progress history.
-          </div>
-        </div>
+  <div className="auth-page landing-page">
+    <div className="auth-card landing-card">
+      <div className="auth-header">
+        <div className="pill">Welcome</div>
+        <h1>Start your fitness journey</h1>
+        <p className="muted">
+          Access your personalized plans, track sessions, and monitor progress with a premium
+          experience.
+        </p>
+      </div>
+      <div className="landing-actions">
         <Link className="button primary" to="/auth">
-          Sign In
+          Login
+        </Link>
+        <Link className="button ghost" to="/auth">
+          Register
         </Link>
       </div>
-      <div className="stat-grid">
-        <div className="stat-card gradient-widget stat-variant-a">
-          <div className="row">
-            <div className="icon-bubble">🗓️</div>
-            <div>
-              <div className="muted">Plan cycles</div>
-              <div className="stat-value">Monthly</div>
-            </div>
+      <div className="landing-highlights">
+        <div className="highlight">
+          <div className="highlight-icon">📅</div>
+          <div>
+            <div className="highlight-title">Monthly plans</div>
+            <div className="muted">Structured blocks that evolve week to week.</div>
           </div>
         </div>
-        <div className="stat-card gradient-widget stat-variant-b">
-          <div className="row">
-            <div className="icon-bubble">✅</div>
-            <div>
-              <div className="muted">Track completion</div>
-              <div className="stat-value">Sets + Reps</div>
-            </div>
+        <div className="highlight">
+          <div className="highlight-icon">🏋️</div>
+          <div>
+            <div className="highlight-title">Session logging</div>
+            <div className="muted">Track weights, reps, exertion, and notes.</div>
           </div>
         </div>
-        <div className="stat-card gradient-widget stat-variant-c">
-          <div className="row">
-            <div className="icon-bubble">📈</div>
-            <div>
-              <div className="muted">Progress</div>
-              <div className="stat-value">Volume & Load</div>
-            </div>
+        <div className="highlight">
+          <div className="highlight-icon">📈</div>
+          <div>
+            <div className="highlight-title">Progress insights</div>
+            <div className="muted">Volume & load trends with projections.</div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="grid">
-      <div className="card">
-        <h3>Plan by month</h3>
-        <div className="muted">
-          Your plan adapts with weekly progressions and tracks your training blocks.
-        </div>
-      </div>
-      <div className="card">
-        <h3>Log workouts</h3>
-        <div className="muted">
-          Record weights, reps, exertion, and notes for every session.
-        </div>
-      </div>
-      <div className="card">
-        <h3>See trends</h3>
-        <div className="muted">
-          Track volume and average weights to visualize real progress.
         </div>
       </div>
     </div>

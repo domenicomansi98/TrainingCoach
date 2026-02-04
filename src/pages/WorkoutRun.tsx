@@ -62,6 +62,14 @@ const WorkoutRun = () => {
     if (selectedWeek === 3) return exercise.week3
     return exercise.week4
   }
+  const parseReps = (text?: string | null) => {
+    if (!text) return null
+    const match = text.replace(',', '.').match(/x\s*(\d+)(?:\s*-\s*(\d+))?/i)
+    if (!match) return null
+    const a = Number(match[1])
+    const b = match[2] ? Number(match[2]) : a
+    return match[2] ? `${a}-${b}` : `${a}`
+  }
 
   const upsertLog = async (
     exerciseId: string,
@@ -85,7 +93,7 @@ const WorkoutRun = () => {
 
   return (
     <div className="section">
-      <div className="glass-card">
+      <div className="hero hero-dark">
         <div className="toolbar">
           <div>
             <div className="pill">Workout</div>
@@ -141,7 +149,7 @@ const WorkoutRun = () => {
       </div>
 
       {rest && (
-        <div className="card">
+        <div className="card rest-card">
           <div className="section-title">Rest timer</div>
           <div className="muted">
             {rest.label} · {rest.remaining}s remaining
@@ -149,16 +157,28 @@ const WorkoutRun = () => {
         </div>
       )}
 
-      <div className="panel-grid">
+      <div className="list-stack">
         {exercises?.map((exercise) => {
           const log = logMap.get(exercise.id)
           const completedSets = log?.completedSets ?? 0
           const sets = Array.from({ length: exercise.plannedSets })
           return (
-            <div className="card" key={exercise.id}>
-              <div className="section-title">{exercise.name}</div>
-              <div className="muted">{getWeekValue(exercise) ?? '-'}</div>
-              <div className="sets">
+            <div className="list-card exercise-card" key={exercise.id}>
+              <div className="list-header">
+                <div>
+                  <div className="section-title">{exercise.name}</div>
+                  <div className="muted">{getWeekValue(exercise) ?? '-'}</div>
+                </div>
+                <button
+                  className="button secondary"
+                  onClick={() => {
+                    setRest({ label: exercise.name, remaining: exercise.restSeconds })
+                  }}
+                >
+                  Rest {exercise.restSeconds}s
+                </button>
+              </div>
+              <div className="list-sets">
                 {sets.map((_, idx) => (
                   <button
                     key={idx}
@@ -172,16 +192,8 @@ const WorkoutRun = () => {
                   </button>
                 ))}
               </div>
-              <button
-                className="button secondary"
-                onClick={() => {
-                  setRest({ label: exercise.name, remaining: exercise.restSeconds })
-                }}
-              >
-                Start rest ({exercise.restSeconds}s)
-              </button>
-              <div className="row">
-                <div style={{ flex: 1 }}>
+              <div className="list-controls">
+                <div>
                   <label>Weight</label>
                   <input
                     className="input"
@@ -193,7 +205,7 @@ const WorkoutRun = () => {
                     }}
                   />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div>
                   <label>Reps</label>
                   <input
                     className="input"
@@ -206,10 +218,8 @@ const WorkoutRun = () => {
                     }}
                   />
                 </div>
-              </div>
-              <div className="row">
-                <div style={{ flex: 1 }}>
-                  <label>Exertion (1-10)</label>
+                <div>
+                  <label>Exertion</label>
                   <input
                     className="input"
                     type="number"

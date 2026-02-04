@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, useParams } from 'react-router-dom'
-import { db } from '../data/db'
+import { db, getDueSessionId } from '../data/db'
 
 const PlanDetail = () => {
   const { planId } = useParams()
@@ -17,6 +17,7 @@ const PlanDetail = () => {
           `${plan.endDate}T00:00:00`
         ).toLocaleDateString()}`
       : null
+  const dueSessionId = sessions?.length ? getDueSessionId(plan, sessions, new Date()) : null
 
   return (
     <div className="section">
@@ -71,9 +72,10 @@ const PlanDetail = () => {
               {sessions.map((session) => (
                 <Link
                   key={session.id}
-                  className="widget session-card"
+                  className={`widget session-card ${dueSessionId === session.id ? 'today' : ''}`}
                   to={`/session/${session.id}`}
                 >
+                  {dueSessionId === session.id && <div className="today-pill">Today</div>}
                   <div className="widget-title">Session</div>
                   <div className="widget-value">{session.name}</div>
                   <div className="muted">Tap to edit sets + rest</div>

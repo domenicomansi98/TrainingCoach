@@ -33,6 +33,14 @@ const SessionDetail = () => {
     if (selectedWeek === 3) return exercise.week3
     return exercise.week4
   }
+  const parseReps = (text?: string | null) => {
+    if (!text) return null
+    const match = text.replace(',', '.').match(/x\s*(\d+)(?:\s*-\s*(\d+))?/i)
+    if (!match) return null
+    const a = Number(match[1])
+    const b = match[2] ? Number(match[2]) : a
+    return match[2] ? `${a}-${b}` : `${a}`
+  }
 
   if (!session || !plan)
     return (
@@ -44,7 +52,7 @@ const SessionDetail = () => {
 
   return (
     <div className="section">
-      <div className="glass-card">
+      <div className="hero hero-dark">
         <div className="toolbar">
           <div>
             <div className="pill">Session</div>
@@ -112,13 +120,18 @@ const SessionDetail = () => {
         </div>
       </div>
 
-      <div className="panel-grid">
+      <div className="list-stack">
         {exercises?.map((exercise) => (
-          <div key={exercise.id} className="card">
-            <div className="section-title">{exercise.name}</div>
-            <div className="muted">{getWeekValue(exercise) ?? '-'}</div>
-            <div className="row">
-              <div style={{ flex: 1 }}>
+          <div key={exercise.id} className="list-card exercise-card">
+            <div className="list-header">
+              <div>
+                <div className="section-title">{exercise.name}</div>
+                <div className="muted">{getWeekValue(exercise) ?? '-'}</div>
+              </div>
+              <div className="list-meta">Session</div>
+            </div>
+            <div className="list-controls">
+              <div>
                 <label>Sets</label>
                 <input
                   className="input"
@@ -135,7 +148,11 @@ const SessionDetail = () => {
                   }}
                 />
               </div>
-              <div style={{ flex: 1 }}>
+              <div>
+                <label>Target reps</label>
+                <input className="input" placeholder="e.g. 8-12" />
+              </div>
+              <div>
                 <label>Rest (sec)</label>
                 <input
                   className="input"
@@ -152,12 +169,8 @@ const SessionDetail = () => {
                   }}
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <label>Target reps</label>
-                <input className="input" placeholder="e.g. 8-12" />
-              </div>
             </div>
-            <div className="muted">
+            <div className="muted list-footnote">
               Log actual weight, reps, exertion, and comments in the workout view.
             </div>
           </div>

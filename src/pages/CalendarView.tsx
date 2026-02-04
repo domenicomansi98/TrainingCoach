@@ -35,16 +35,20 @@ const CalendarView = () => {
     return slots
   }, [monthDate, monthStart, monthEnd])
 
+  const hidePlanned =
+    activePlan && /febbraio/i.test(activePlan.name) && !activePlan.startDate
+  const plannedVisible = hidePlanned ? [] : planned ?? []
+
   const plannedByDate = useMemo(() => {
     const map = new Map<string, typeof planned>()
-    planned?.forEach((item) => {
+    plannedVisible.forEach((item) => {
       const key = new Date(item.date).toDateString()
       const list = map.get(key) ?? []
       list.push(item)
       map.set(key, list)
     })
     return map
-  }, [planned])
+  }, [plannedVisible])
 
   const sessionMap = useMemo(() => {
     const map = new Map<string, string>()
@@ -54,7 +58,7 @@ const CalendarView = () => {
 
   const monthStats = useMemo(() => {
     const monthKey = `${monthDate.getFullYear()}-${monthDate.getMonth()}`
-    const items = (planned ?? []).filter((item) => {
+    const items = plannedVisible.filter((item) => {
       const d = new Date(item.date)
       return `${d.getFullYear()}-${d.getMonth()}` === monthKey
     })
@@ -62,11 +66,11 @@ const CalendarView = () => {
       planned: items.length,
       completed: items.filter((i) => i.status === 'completed').length
     }
-  }, [planned, monthDate])
+  }, [plannedVisible, monthDate])
 
   return (
     <div className="section">
-      <div className="glass-card">
+      <div className="hero hero-dark">
         <div className="toolbar">
           <div>
             <div className="pill">Training calendar</div>
@@ -98,7 +102,7 @@ const CalendarView = () => {
             </button>
           </div>
         </div>
-        <div className="widget-grid">
+        <div className="hero-stats">
           <div className="widget gradient-widget stat-variant-a">
             <div className="row">
               <div className="icon-bubble">📌</div>
@@ -133,8 +137,17 @@ const CalendarView = () => {
         </div>
       </div>
 
-      <div className="card">
-        <div className="calendar">
+      <div className="card calendar-card">
+        {hidePlanned && (
+          <div className="card calendar-callout" style={{ marginBottom: '16px' }}>
+            <div className="section-title">Program not started yet</div>
+            <div className="muted">
+              Start your first workout to set the program start date. The calendar will populate once
+              you begin.
+            </div>
+          </div>
+        )}
+        <div className="calendar calendar-surface">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((label) => (
             <div key={label} className="calendar-header">
               {label}

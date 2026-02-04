@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link } from 'react-router-dom'
-import { db, ensurePlannedWorkouts, getPlanForDate, seedDemoData } from '../data/db'
+import { db, ensurePlannedWorkouts, getDueSessionId, getPlanForDate, seedDemoData } from '../data/db'
 
 const Dashboard = () => {
   const plans = useLiveQuery(() => db.plans.orderBy('createdAt').reverse().toArray(), [])
@@ -16,12 +16,16 @@ const Dashboard = () => {
     if (activePlan) ensurePlannedWorkouts(activePlan)
   }, [activePlan?.id])
 
+  const dueSessionId =
+    activePlan && sessions?.length ? getDueSessionId(activePlan, sessions, new Date()) : null
+  const dueSession = sessions?.find((session) => session.id === dueSessionId) ?? sessions?.[0]
+
   return (
     <div>
-      <div className="hero">
-        <div className="toolbar">
+      <div className="hero hero-dark">
+        <div className="hero-content">
           <div>
-              <div className="pill">Monthly plan</div>
+            <div className="pill">Monthly plan</div>
             <div className="hero-title">Train with clarity, recover with intent.</div>
             <div className="muted">
               {activePlan?.name ?? 'Load your first plan to get started.'}
@@ -33,7 +37,7 @@ const Dashboard = () => {
             </Link>
           )}
         </div>
-        <div className="stat-grid">
+        <div className="hero-stats">
           <div className="stat-card gradient-widget stat-variant-a">
             <div className="row">
               <div className="icon-bubble">🏋️</div>
@@ -65,15 +69,15 @@ const Dashboard = () => {
       </div>
 
       <div className="grid">
-        <div className="focus-card">
+        <div className="focus-card dark-card">
           <div>
             <div className="pill">Today</div>
             <h3>Find your strength</h3>
             <div className="muted">Start a session and track reps, weights, and fatigue.</div>
           </div>
-          {activePlan && (
-            <Link className="button" to={`/plan/${activePlan.id}`}>
-              Start Now
+          {activePlan && dueSession && (
+            <Link className="button primary" to={`/session/${dueSession.id}`}>
+              Start {dueSession.name}
             </Link>
           )}
         </div>

@@ -158,6 +158,8 @@ const classifyMovement = (name: string): Exercise['movement'] => {
   return 'other'
 }
 
+const isDynamicFebPlan = (plan: Pick<Plan, 'name'>) => /febbraio/i.test(plan.name)
+
 export const seedPlansFromImport = async () => {
   const existingPlans = await db.plans.toArray()
   const existingByName = new Map(existingPlans.map((plan) => [plan.name, plan]))
@@ -212,14 +214,15 @@ export const seedPlansFromImport = async () => {
     }
 
     const planId = uuid()
+    const isDynamic = isDynamicFebPlan({ name: plan.name })
     await db.plans.add({
       id: planId,
       name: plan.name,
       createdAt: now,
       updatedAt: now,
       currentWeek: 1,
-      startDate: plan.startDate ?? null,
-      endDate: plan.endDate ?? null,
+      startDate: isDynamic ? null : plan.startDate ?? null,
+      endDate: isDynamic ? null : plan.endDate ?? null,
       warmup: plan.warmup ?? []
     })
 
@@ -287,12 +290,87 @@ export const purgePlansWithoutDates = async () => {
   )
 }
 
-const TRAINING_DAYS = [1, 2, 4, 5] // Mon, Tue, Thu, Fri
+export const purgeDuplicatePlansByName = async () => {
+  const plans = await db.plans.toArray()
+  const byName = new Map<string, Plan[]>()
+  plans.forEach((plan) => {
+    const list = byName.get(plan.name) ?? []
+    list.push(plan)
+    byName.set(plan.name, list)
+  })
+
+  const duplicates = Array.from(byName.values()).filter((list) => list.length > 1)
+  if (!duplicates.length) return
+
+  const plansToDelete: string[] = []
+  duplicates.forEach((list) => {
+    const dated = list.filter((plan) => plan.startDate && plan.endDate)
+    const pool = dated.length ? dated : list
+    const sorted = pool.slice().sort((a, b) => (a.updatedAt > b.updatedAt ? -1 : 1))
+    const keepId = sorted[0]?.id
+    list
+      .filter((plan) => plan.id !== keepId)
+      .forEach((plan) => plansToDelete.push(plan.id))
+  })
+  if (!plansToDelete.length) return
+
+  await db.transaction(
+    'rw',
+    [db.plans, db.sessions, db.exercises, db.plannedWorkouts, db.workouts, db.exerciseLogs],
+    async () => {
+      const sessions = await db.sessions.where('planId').anyOf(plansToDelete).toArray()
+      const sessionIds = sessions.map((session) => session.id)
+
+      const workouts = await db.workouts.where('planId').anyOf(plansToDelete).toArray()
+      const workoutIds = workouts.map((workout) => workout.id)
+
+      if (workoutIds.length) {
+        await db.exerciseLogs.where('workoutId').anyOf(workoutIds).delete()
+      }
+      if (sessionIds.length) {
+        await db.exercises.where('sessionId').anyOf(sessionIds).delete()
+      }
+
+      await db.plannedWorkouts.where('planId').anyOf(plansToDelete).delete()
+      await db.workouts.where('planId').anyOf(plansToDelete).delete()
+      await db.sessions.where('planId').anyOf(plansToDelete).delete()
+      await db.plans.where('id').anyOf(plansToDelete).delete()
+    }
+  )
+}
+
+const TRAINING_DAYS = [1, 2, 4, 5] // Mon, Tue, Thu, Fri (Sat/Sun rest)
 
 const parseLocalDate = (value?: string | null) => {
   if (!value) return undefined
   const date = new Date(`${value}T00:00:00`)
   return Number.isNaN(date.getTime()) ? undefined : date
+}
+
+const parsePlanNameRange = (name: string) => {
+  const map: Record<string, number> = {
+    gennaio: 0,
+    febbraio: 1,
+    marzo: 2,
+    aprile: 3,
+    maggio: 4,
+    giugno: 5,
+    luglio: 6,
+    agosto: 7,
+    settembre: 8,
+    ottobre: 9,
+    novembre: 10,
+    dicembre: 11
+  }
+  const lower = name.toLowerCase()
+  const monthKey = Object.keys(map).find((key) => lower.includes(key))
+  const yearMatch = lower.match(/\b(20\d{2})\b/)
+  if (!monthKey || !yearMatch) return undefined
+  const year = Number(yearMatch[1])
+  const month = map[monthKey]
+  const start = new Date(year, month, 1)
+  const end = new Date(year, month + 1, 0)
+  return { start, end }
 }
 
 export const getPlanForDate = (plans: Plan[] | undefined, targetDate: Date) => {
@@ -301,8 +379,8 @@ export const getPlanForDate = (plans: Plan[] | undefined, targetDate: Date) => {
   const withRanges = plans
     .map((plan) => ({
       plan,
-      start: parseLocalDate(plan.startDate),
-      end: parseLocalDate(plan.endDate)
+      start: parseLocalDate(plan.startDate) ?? parsePlanNameRange(plan.name)?.start,
+      end: parseLocalDate(plan.endDate) ?? parsePlanNameRange(plan.name)?.end
     }))
     .filter((item) => item.start && item.end) as Array<{
     plan: Plan
@@ -320,14 +398,44 @@ export const getPlanForDate = (plans: Plan[] | undefined, targetDate: Date) => {
   return ordered[0]
 }
 
+const normalizeDate = (value: Date) =>
+  new Date(value.getFullYear(), value.getMonth(), value.getDate())
+
+export const getDueSessionId = (
+  plan: Plan,
+  sessions: Session[],
+  targetDate: Date
+) => {
+  if (!sessions.length) return null
+  if (!plan.startDate) return sessions[0]?.id ?? null
+  const start = normalizeDate(new Date(`${plan.startDate}T00:00:00`))
+  const today = normalizeDate(targetDate)
+  if (today < start) return null
+  if (!TRAINING_DAYS.includes(today.getDay())) return null
+  let count = 0
+  const cursor = new Date(start)
+  while (cursor <= today) {
+    if (TRAINING_DAYS.includes(cursor.getDay())) count += 1
+    cursor.setDate(cursor.getDate() + 1)
+  }
+  if (count <= 0) return null
+  const index = (count - 1) % sessions.length
+  return sessions[index]?.id ?? null
+}
+
 export const ensurePlannedWorkouts = async (plan: Plan) => {
   const planId = plan.id
   const sessions = await db.sessions.where('planId').equals(planId).sortBy('order')
   if (!sessions.length) return
 
   const today = new Date()
-  const rangeStart =
-    parseLocalDate(plan.startDate) ?? new Date(today.getFullYear(), today.getMonth(), 1)
+  const isDynamic = isDynamicFebPlan(plan)
+  const rangeStart = plan.startDate
+    ? parseLocalDate(plan.startDate)
+    : isDynamic
+    ? null
+    : new Date(today.getFullYear(), today.getMonth(), 1)
+  if (!rangeStart) return
   const rangeEnd =
     parseLocalDate(plan.endDate) ?? new Date(today.getFullYear(), today.getMonth() + 1, 0)
 
@@ -401,8 +509,6 @@ export const seedDemoData = async (planId: string) => {
   }
 }
 
-const isDynamicFebPlan = (plan: Plan) => /febbraio/i.test(plan.name)
-
 const toDateOnly = (value: string) => new Date(value).toISOString().slice(0, 10)
 
 export const updateDynamicPlanDates = async (planId: string) => {
@@ -435,5 +541,37 @@ export const updateDynamicPlanDates = async (planId: string) => {
   if (Object.keys(updates).length > 0) {
     updates.updatedAt = new Date().toISOString()
     await db.plans.update(plan.id, updates)
+    const refreshed = await db.plans.get(plan.id)
+    if (refreshed) {
+      await ensurePlannedWorkouts(refreshed)
+    }
+  }
+}
+
+export const normalizeDynamicPlanState = async () => {
+  const plans = await db.plans.toArray()
+  const dynamicPlans = plans.filter((plan) => isDynamicFebPlan(plan))
+  if (!dynamicPlans.length) return
+
+  for (const plan of dynamicPlans) {
+    const completedWorkouts = await db.workouts
+      .where('planId')
+      .equals(plan.id)
+      .and((workout) => workout.status === 'completed')
+      .toArray()
+
+    if (completedWorkouts.length === 0) {
+      const updates: Partial<Plan> = {}
+      if (plan.startDate) updates.startDate = null
+      if (plan.endDate) updates.endDate = null
+      if (Object.keys(updates).length > 0) {
+        updates.updatedAt = new Date().toISOString()
+        await db.plans.update(plan.id, updates)
+      }
+      await db.plannedWorkouts.where('planId').equals(plan.id).delete()
+      continue
+    }
+
+    await updateDynamicPlanDates(plan.id)
   }
 }
