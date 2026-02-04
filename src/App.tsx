@@ -9,6 +9,7 @@ import CalendarView from './pages/CalendarView'
 import ProgressView from './pages/ProgressView'
 import Auth from './pages/Auth'
 import MyPlan from './pages/MyPlan'
+import Landing from './pages/Landing'
 import { syncAll } from './data/sync'
 import ErrorBoundary from './components/ErrorBoundary'
 import { supabase } from './data/supabase'
@@ -85,53 +86,56 @@ const App = () => {
         </div>
       )
     }
-    if (!userEmail) return <Navigate to="/auth" replace />
+    if (!userEmail) return <Navigate to="/" replace />
     return <>{children}</>
   }
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-mark">Pulse</div>
-          <div>
-            <div className="brand-title">Workout Planner</div>
-            <div className="brand-subtitle">Strength • Consistency • Progress</div>
+      {userEmail && (
+        <header className="topbar">
+          <div className="brand">
+            <div className="brand-mark">Pulse</div>
+            <div>
+              <div className="brand-title">Workout Planner</div>
+              <div className="brand-subtitle">Strength • Consistency • Progress</div>
+            </div>
           </div>
-        </div>
-        <nav className="topnav">
-          <NavLink to="/" end className="nav-link">
-            Home
-          </NavLink>
-          <NavLink to="/calendar" className="nav-link">
-            Calendar
-          </NavLink>
-          <NavLink to="/plans" className="nav-link">
-            My Plan
-          </NavLink>
-          <NavLink to="/progress" className="nav-link">
-            Progress
-          </NavLink>
-        </nav>
-        <div className="row">
-          <div className={`sync-indicator ${syncState}`}>
-            <span className="dot" />
-            {syncState === 'syncing' && 'Syncing'}
-            {syncState === 'ok' && 'Synced'}
-            {syncState === 'error' && 'Sync paused'}
-            {syncState === 'idle' && 'Auto-Sync On'}
+          <nav className="topnav">
+            <NavLink to="/home" end className="nav-link">
+              Home
+            </NavLink>
+            <NavLink to="/calendar" className="nav-link">
+              Calendar
+            </NavLink>
+            <NavLink to="/plans" className="nav-link">
+              My Plan
+            </NavLink>
+            <NavLink to="/progress" className="nav-link">
+              Progress
+            </NavLink>
+          </nav>
+          <div className="row">
+            <div className={`sync-indicator ${syncState}`}>
+              <span className="dot" />
+              {syncState === 'syncing' && 'Syncing'}
+              {syncState === 'ok' && 'Synced'}
+              {syncState === 'error' && 'Sync paused'}
+              {syncState === 'idle' && 'Auto-Sync On'}
+            </div>
+            <NavLink to="/auth" className="user-chip">
+              {initials}
+            </NavLink>
           </div>
-          <NavLink to="/auth" className="user-chip">
-            {initials}
-          </NavLink>
-        </div>
-      </header>
+        </header>
+      )}
       <main className="content">
         <ErrorBoundary>
           <Routes>
+            <Route path="/" element={userEmail ? <Navigate to="/home" replace /> : <Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route
-              path="/"
+              path="/home"
               element={
                 <RequireAuth>
                   <Dashboard />
@@ -189,28 +193,30 @@ const App = () => {
           </Routes>
         </ErrorBoundary>
       </main>
-      <nav className="bottom-nav">
-        <NavLink to="/" end className="bottom-link">
-          <span className="icon">●</span>
-          Home
-        </NavLink>
-        <NavLink to="/calendar" className="bottom-link">
-          <span className="icon">●</span>
-          Calendar
-        </NavLink>
-        <NavLink to="/plans" className="bottom-link">
-          <span className="icon">●</span>
-          My Plan
-        </NavLink>
-        <NavLink to="/progress" className="bottom-link">
-          <span className="icon">●</span>
-          Progress
-        </NavLink>
-        <NavLink to="/auth" className="bottom-link">
-          <span className="icon">●</span>
-          Account
-        </NavLink>
-      </nav>
+      {userEmail && (
+        <nav className="bottom-nav">
+          <NavLink to="/home" end className="bottom-link">
+            <span className="icon">●</span>
+            Home
+          </NavLink>
+          <NavLink to="/calendar" className="bottom-link">
+            <span className="icon">●</span>
+            Calendar
+          </NavLink>
+          <NavLink to="/plans" className="bottom-link">
+            <span className="icon">●</span>
+            My Plan
+          </NavLink>
+          <NavLink to="/progress" className="bottom-link">
+            <span className="icon">●</span>
+            Progress
+          </NavLink>
+          <NavLink to="/auth" className="bottom-link">
+            <span className="icon">●</span>
+            Account
+          </NavLink>
+        </nav>
+      )}
     </div>
   )
 }
