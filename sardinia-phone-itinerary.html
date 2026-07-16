@@ -1,0 +1,541 @@
+<title>Sardinia · Final 3 Days</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --sand:      #F7F3EA;
+    --surface:   #FFFDF8;
+    --surface-2: #F1EADB;
+    --ink:       #14262B;
+    --ink-soft:  #55696D;
+    --ink-faint: #8A9698;
+    --sea:       #0E7B84;
+    --sea-deep:  #0A5A61;
+    --sun:       #E4703A;
+    --sun-soft:  #FBE7DA;
+    --line:      #E7DFCF;
+    --line-2:    #EFE8D9;
+    --shadow:    0 1px 2px rgba(20,38,43,.05), 0 8px 24px -12px rgba(20,38,43,.16);
+
+    --serif: ui-serif, "New York", Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, "Helvetica Neue", Arial, sans-serif;
+
+    --wrap: 640px;
+    --pad: 18px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --sand:      #0A1A1F;
+      --surface:   #102A31;
+      --surface-2: #16343C;
+      --ink:       #EAF2ED;
+      --ink-soft:  #A5BABC;
+      --ink-faint: #6E8688;
+      --sea:       #45BEC6;
+      --sea-deep:  #7FD6DC;
+      --sun:       #F2895C;
+      --sun-soft:  #35251D;
+      --line:      #1D3B43;
+      --line-2:    #17333A;
+      --shadow:    0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="light"] {
+    --sand:#F7F3EA; --surface:#FFFDF8; --surface-2:#F1EADB; --ink:#14262B; --ink-soft:#55696D;
+    --ink-faint:#8A9698; --sea:#0E7B84; --sea-deep:#0A5A61; --sun:#E4703A; --sun-soft:#FBE7DA;
+    --line:#E7DFCF; --line-2:#EFE8D9; --shadow:0 1px 2px rgba(20,38,43,.05), 0 8px 24px -12px rgba(20,38,43,.16);
+  }
+  :root[data-theme="dark"] {
+    --sand:#0A1A1F; --surface:#102A31; --surface-2:#16343C; --ink:#EAF2ED; --ink-soft:#A5BABC;
+    --ink-faint:#6E8688; --sea:#45BEC6; --sea-deep:#7FD6DC; --sun:#F2895C; --sun-soft:#35251D;
+    --line:#1D3B43; --line-2:#17333A; --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+  }
+
+  body {
+    margin: 0;
+    background: var(--sand);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: var(--wrap); margin: 0 auto; }
+
+  /* ---------- Header ---------- */
+  header.top {
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in srgb, var(--sand) 88%, transparent);
+    backdrop-filter: saturate(1.4) blur(10px);
+    -webkit-backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top__inner { max-width: var(--wrap); margin: 0 auto; padding: 12px var(--pad) 0; }
+  .brand { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+  .brand__eyebrow {
+    font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--sea); font-weight: 700;
+  }
+  .brand__title { font-family: var(--serif); font-size: 1.18rem; font-weight: 600; letter-spacing: .01em; }
+  .brand__meta { margin-left: auto; font-size: .72rem; color: var(--ink-faint); letter-spacing: .02em; }
+
+  /* Segmented control */
+  .tabs { display: flex; gap: 6px; padding: 12px 0 12px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    appearance: none; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); font-family: var(--sans); font-size: .82rem; font-weight: 600;
+    padding: 9px 13px; border-radius: 999px; white-space: nowrap; cursor: pointer;
+    min-height: 42px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+    line-height: 1.1; transition: background .18s, color .18s, border-color .18s;
+  }
+  .tab b { font-weight: 700; }
+  .tab small { font-size: .64rem; font-weight: 600; letter-spacing: .04em; color: var(--ink-faint); text-transform: uppercase; }
+  .tab[aria-selected="true"] { background: var(--sea); border-color: var(--sea); color: #fff; }
+  .tab[aria-selected="true"] small { color: rgba(255,255,255,.82); }
+  .tab:focus-visible { outline: 2px solid var(--sea); outline-offset: 2px; }
+
+  /* ---------- Panels ---------- */
+  main { padding: 18px var(--pad) 60px; }
+  .panel { animation: fade .28s ease; }
+  .panel[hidden] { display: none; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
+
+  .day-head { margin: 2px 0 14px; }
+  .day-head h2 { font-family: var(--serif); font-size: 1.7rem; font-weight: 600; margin: 2px 0 2px; letter-spacing: .01em; text-wrap: balance; }
+  .day-head p { margin: 0; color: var(--ink-soft); font-size: .95rem; }
+
+  /* Route chip row */
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0 4px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-2); color: var(--ink-soft);
+    border-radius: 8px; padding: 6px 10px; font-size: .78rem; font-weight: 600;
+    border: 1px solid var(--line-2);
+  }
+  .chip svg { width: 14px; height: 14px; color: var(--sea); flex: none; }
+  .chip b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* Callout / alert cards */
+  .callout {
+    display: flex; gap: 11px; align-items: flex-start;
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 3px solid var(--sea); border-radius: 12px;
+    padding: 13px 14px; margin: 14px 0; box-shadow: var(--shadow);
+  }
+  .callout--alert { border-left-color: var(--sun); background: var(--sun-soft); }
+  .callout__icon { width: 22px; height: 22px; flex: none; color: var(--sea); margin-top: 1px; }
+  .callout--alert .callout__icon { color: var(--sun); }
+  .callout h3 { margin: 0 0 3px; font-size: .82rem; letter-spacing: .04em; text-transform: uppercase; font-weight: 700; }
+  .callout p { margin: 0; font-size: .9rem; color: var(--ink-soft); line-height: 1.5; }
+  .callout p b { color: var(--ink); }
+  .callout a { color: var(--sea-deep); font-weight: 700; text-decoration: none; border-bottom: 1px solid currentColor; }
+
+  /* ---------- Time rail ---------- */
+  .rail { position: relative; margin: 8px 0 0; padding: 4px 0; }
+  .ev { position: relative; display: grid; grid-template-columns: 58px 1fr; gap: 12px; padding: 0 0 4px; }
+  .ev__time {
+    font-size: .86rem; font-weight: 700; color: var(--sea-deep);
+    font-variant-numeric: tabular-nums; text-align: right; padding-top: 12px; line-height: 1.25;
+    letter-spacing: -.01em;
+  }
+  .ev__body { position: relative; padding: 12px 0 12px 22px; border-left: 2px solid var(--line); }
+  .ev:last-child .ev__body { border-left-color: transparent; }
+  .ev__dot {
+    position: absolute; left: -8px; top: 15px; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--surface); border: 3px solid var(--sea); box-shadow: 0 0 0 3px var(--sand);
+  }
+  .ev__title { font-weight: 650; font-size: .98rem; margin: 0; letter-spacing: -.005em; }
+  .ev__note { margin: 3px 0 0; font-size: .86rem; color: var(--ink-soft); line-height: 1.45; }
+  .ev__note b { color: var(--ink); font-weight: 650; }
+
+  /* Special event variants */
+  .ev--sun .ev__dot { border-color: var(--sun); background: var(--sun); }
+  .ev--sun .ev__time { color: var(--sun); }
+  .ev--star .ev__dot { border-color: var(--sun); background: var(--surface); }
+  .ev--star .ev__dot::after {
+    content:""; position:absolute; inset: 2px; border-radius:50%; background: var(--sun);
+  }
+  .ev--sea .ev__dot { border-color: var(--sea-deep); }
+
+  .ev__tag {
+    display: inline-flex; align-items:center; gap:5px; margin-left: 8px; vertical-align: 1px;
+    font-size: .6rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--sun); background: var(--sun-soft); padding: 2px 7px; border-radius: 999px;
+  }
+  .ev__icn { width: 13px; height: 13px; vertical-align: -2px; color: var(--sun); }
+
+  /* Heat band */
+  .heatband {
+    grid-column: 1 / -1; margin: 6px 0 6px 70px;
+    background: repeating-linear-gradient(135deg, var(--sun-soft), var(--sun-soft) 10px, transparent 10px, transparent 20px);
+    border: 1px dashed var(--sun); border-radius: 10px; padding: 10px 12px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .heatband svg { width: 18px; height: 18px; color: var(--sun); flex: none; }
+  .heatband div { font-size: .82rem; }
+  .heatband b { color: var(--sun); font-weight: 800; letter-spacing: .03em; text-transform: uppercase; font-size: .72rem; display:block; }
+  .heatband span { color: var(--ink-soft); }
+
+  /* Choice cards (Day 2) */
+  .choice { display: grid; gap: 10px; margin: 6px 0 2px; }
+  @media (min-width: 480px) { .choice { grid-template-columns: 1fr 1fr; } }
+  .choice__card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; box-shadow: var(--shadow); }
+  .choice__card h4 { margin: 0 0 4px; font-size: .95rem; font-family: var(--serif); }
+  .choice__k { font-size: .64rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--sea); }
+  .choice__card p { margin: 4px 0 0; font-size: .84rem; color: var(--ink-soft); line-height: 1.45; }
+
+  /* ---------- Info panel ---------- */
+  .route { list-style: none; margin: 6px 0 4px; padding: 0; }
+  .route li { position: relative; padding: 0 0 16px 26px; }
+  .route li::before { content:""; position:absolute; left: 4px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--sea); }
+  .route li::after { content:""; position:absolute; left: 8px; top: 16px; bottom: -2px; width: 2px; background: var(--line); }
+  .route li:last-child { padding-bottom: 0; }
+  .route li:last-child::after { display: none; }
+  .route .stop { font-weight: 700; font-size: .95rem; }
+  .route .leg { display:block; font-size: .78rem; color: var(--ink-faint); font-weight: 600; margin-top: 1px; }
+  .route li.big::before { background: var(--sun); width: 12px; height: 12px; left: 3px; }
+
+  details.acc { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin: 10px 0; overflow: hidden; box-shadow: var(--shadow); }
+  details.acc > summary {
+    list-style: none; cursor: pointer; padding: 14px 15px; font-weight: 700; font-size: .95rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  details.acc > summary::-webkit-details-marker { display: none; }
+  details.acc > summary .caret { margin-left: auto; transition: transform .2s; color: var(--ink-faint); }
+  details.acc[open] > summary .caret { transform: rotate(90deg); }
+  details.acc > summary svg.k { width: 18px; height: 18px; color: var(--sea); flex: none; }
+  .acc__body { padding: 0 15px 15px; }
+  .acc__body p { margin: 0 0 8px; font-size: .9rem; color: var(--ink-soft); line-height: 1.5; }
+  .acc__body ul { margin: 4px 0 8px; padding-left: 18px; }
+  .acc__body li { font-size: .9rem; color: var(--ink-soft); line-height: 1.5; margin: 3px 0; }
+  .acc__body li b, .acc__body p b { color: var(--ink); font-weight: 650; }
+  .acc__body h5 { margin: 12px 0 4px; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--sea); }
+  .acc__body h5:first-child { margin-top: 2px; }
+
+  .numlist { list-style: none; counter-reset: n; margin: 4px 0; padding: 0; }
+  .numlist li { counter-increment: n; position: relative; padding: 5px 0 5px 30px; font-size: .9rem; color: var(--ink); line-height: 1.45; border-bottom: 1px solid var(--line-2); }
+  .numlist li:last-child { border-bottom: none; }
+  .numlist li::before {
+    content: counter(n); position: absolute; left: 0; top: 5px;
+    font-size: .7rem; font-weight: 800; color: var(--sea); font-variant-numeric: tabular-nums;
+    width: 20px; text-align: right; padding-right: 2px;
+  }
+
+  footer { text-align: center; padding: 8px var(--pad) 40px; color: var(--ink-faint); font-size: .76rem; }
+  footer .it { font-family: var(--serif); font-style: italic; color: var(--ink-soft); font-size: .92rem; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+  </symbol>
+  <symbol id="i-ferry" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 18c.9.6 1.8 1 3 1s2.1-.4 3-1 1.8-1 3-1 2.1.4 3 1 1.8 1 3 1 2.1-.4 3-1"/><path d="M5 18l1.4-6.5a2 2 0 0 1 2-1.5h7.2a2 2 0 0 1 2 1.5L19 18"/><path d="M12 3v7M9 6h6"/>
+  </symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.3 3.2 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.2a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>
+  </symbol>
+  <symbol id="i-fuel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22a6 6 0 0 0 6-6c0-4-6-10-6-10S6 12 6 16a6 6 0 0 0 6 6z"/>
+  </symbol>
+  <symbol id="i-bike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M5.5 17l3.5-6h5l2 3M9 11l2-3h3M14 8h3"/>
+  </symbol>
+  <symbol id="i-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2 12c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/><path d="M2 18c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/>
+  </symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+  </symbol>
+  <symbol id="i-fork" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 3v6a2 2 0 0 0 4 0V3M7 11v10M17 3c-1.5 0-2 2-2 5s.5 4 2 4M17 3v18"/>
+  </symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>
+  </symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 8h16l-1.2 12.2a1 1 0 0 1-1 .8H6.2a1 1 0 0 1-1-.8z"/><path d="M8.5 8V6a3.5 3.5 0 0 1 7 0v2"/>
+  </symbol>
+  <symbol id="i-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 6l6 6-6 6"/>
+  </symbol>
+</svg>
+
+<header class="top">
+  <div class="top__inner">
+    <div class="brand">
+      <span class="brand__eyebrow">Sardegna</span>
+      <span class="brand__title">The Final Three Days</span>
+      <span class="brand__meta">17–19 Jul</span>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Choose a day">
+      <button class="tab" role="tab" id="tab-d1" aria-controls="p-d1" aria-selected="true"><small>Fri 17</small><b>Villasimius</b></button>
+      <button class="tab" role="tab" id="tab-d2" aria-controls="p-d2" aria-selected="false"><small>Sat 18</small><b>Capo Carbonara</b></button>
+      <button class="tab" role="tab" id="tab-d3" aria-controls="p-d3" aria-selected="false"><small>Sun 19</small><b>Ferry day</b></button>
+      <button class="tab" role="tab" id="tab-in" aria-controls="p-in" aria-selected="false"><small>Ref</small><b>Info</b></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ DAY 1 ============ -->
+  <section class="panel" id="p-d1" role="tabpanel" aria-labelledby="tab-d1">
+    <div class="day-head">
+      <h2>Santa Maria → Villasimius</h2>
+      <p>The scenic transfer, ridden in the cool of the morning.</p>
+    </div>
+    <div class="chips">
+      <span class="chip"><svg><use href="#i-bike"/></svg> <b>~110&nbsp;km</b></span>
+      <span class="chip"><svg><use href="#i-clock"/></svg> <b>~2.5–3&nbsp;h</b> riding</span>
+      <span class="chip"><svg><use href="#i-sun"/></svg> all before noon</span>
+    </div>
+
+    <div class="rail">
+      <div class="ev ev--sea"><div class="ev__time">07:15</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Coffee &amp; cornetto in Santa Maria</p><p class="ev__note">Last look at the Ogliastra sea. Top up fuel.</p></div></div>
+      <div class="ev"><div class="ev__time">08:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Depart — SS125 south</p></div></div>
+      <div class="ev"><div class="ev__time">08:15</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Fuel + water in Tortolì</p><p class="ev__note"><b>Last easy fuel</b> before the mountains — stations thin out in the Sarrabus.</p></div></div>
+      <div class="ev"><div class="ev__time">08:30<br>–10:45</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">SS125 through the Sarrabus</p><p class="ev__note">Empty, sweeping, cork-oak curves. ~2 h moving — ride gently, it's twisty.</p></div></div>
+      <div class="ev"><div class="ev__time">11:30</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Cala Pira <span class="ev__tag"><svg class="ev__icn"><use href="#i-pin"/></svg> cove</span></p><p class="ev__note">Junipers for shade, a Spanish tower, turquoise water. <b>Park in sight of the bike.</b></p></div></div>
+      <div class="ev"><div class="ev__time">12:00<br>–14:15</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Swim &amp; a long lunch</p><p class="ev__note"><b>Eat culurgiones here</b> — you're leaving their Ogliastra homeland.</p></div></div>
+      <div class="ev ev--sea"><div class="ev__time">15:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Villasimius — hotel check-in</p><p class="ev__note">Unload, cold shower, siesta through the worst heat.</p></div></div>
+      <div class="ev"><div class="ev__time">19:30</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Aperitivo with a view</p><p class="ev__note">A beach-club terrace toward Simius, or a rooftop in town.</p></div></div>
+      <div class="ev ev--sun"><div class="ev__time">20:40</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Sunset <span class="ev__tag"><svg class="ev__icn"><use href="#i-sun"/></svg> golden hour</span></p><p class="ev__note">Porto Giunco promontory / Fortezza Vecchia — best light of the day.</p></div></div>
+      <div class="ev ev--star"><div class="ev__time">21:15</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Dinner in Villasimius</p><p class="ev__note">Fresh fish, fregola, seadas.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============ DAY 2 ============ -->
+  <section class="panel" id="p-d2" role="tabpanel" aria-labelledby="tab-d2" hidden>
+    <div class="day-head">
+      <h2>Villasimius &amp; Capo Carbonara</h2>
+      <p>No transfer. Pure sea. This is the day the trip is for.</p>
+    </div>
+
+    <div class="choice">
+      <div class="choice__card">
+        <span class="choice__k">Morning · Option A</span>
+        <h4>The beach classic</h4>
+        <p>At <b>Porto Giunco</b> by 09:15 (parking fills fast). Caribbean sand, the flamingo lagoon behind, the promontory viewpoint. Easy &amp; relaxed.</p>
+      </div>
+      <div class="choice__card">
+        <span class="choice__k">Morning · Option B</span>
+        <h4>The marine reserve</h4>
+        <p><b>Boat into the Capo Carbonara MPA</b> (Isola dei Cavoli). Snorkel glass-clear water, coves you can't drive to, a breeze instead of beach heat. <b>Book the day before.</b></p>
+      </div>
+    </div>
+
+    <div class="rail">
+      <div class="ev ev--sea"><div class="ev__time">08:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Breakfast &amp; strong coffee</p></div></div>
+      <div class="ev"><div class="ev__time">09:15<br>–12:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Option A or B</p><p class="ev__note">Porto Giunco beach, or the reserve boat trip.</p></div></div>
+      <div class="ev"><div class="ev__time">12:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Move to Cala Caterina / Cala Cipolla</p><p class="ev__note">Shadier, calmer — or stay put if you took the boat.</p></div></div>
+      <div class="ev"><div class="ev__time">13:00<br>–14:30</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Relaxed beach lunch</p><p class="ev__note">Grilled fish, a chilled Vermentino.</p></div></div>
+      <div class="heatband"><svg><use href="#i-sun"/></svg><div><b>14:30–17:00 · hot hours</b><span>Swim, shade, doze, photos. <b>Do not gear up and ride in this window.</b></span></div></div>
+      <div class="ev"><div class="ev__time">19:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Aperitivo with a view</p><p class="ev__note">Sunset side of Capo Carbonara.</p></div></div>
+      <div class="ev ev--sun"><div class="ev__time">20:40</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Sunset <span class="ev__tag"><svg class="ev__icn"><use href="#i-sun"/></svg> golden hour</span></p><p class="ev__note">Porto Giunco promontory again, or the Capo Carbonara lighthouse road.</p></div></div>
+      <div class="ev ev--star"><div class="ev__time">21:15</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Dinner — the one you booked</p><p class="ev__note">The memorable meal: fregola con arselle, catch of the day, seadas + mirto.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============ DAY 3 ============ -->
+  <section class="panel" id="p-d3" role="tabpanel" aria-labelledby="tab-d3" hidden>
+    <div class="day-head">
+      <h2>Villasimius → San Teodoro → Olbia</h2>
+      <p>The long haul, done smart: boring bit early &amp; cool, beach at the end, ferry stress-free.</p>
+    </div>
+
+    <div class="callout callout--alert">
+      <svg class="callout__icon"><use href="#i-ferry"/></svg>
+      <div>
+        <h3>Ferry — the one immovable object</h3>
+        <p>Boards <b>23:00</b>. Be at <b>Olbia · Isola Bianca by ~21:00</b> — summer vehicle check-in closes 90 min before. You've built a ~2 h buffer; if the day slips, cut the beach short, never the ferry.</p>
+      </div>
+    </div>
+
+    <div class="chips">
+      <span class="chip"><svg><use href="#i-bike"/></svg> <b>~260&nbsp;km</b></span>
+      <span class="chip"><svg><use href="#i-clock"/></svg> <b>~4&nbsp;h</b> riding</span>
+      <span class="chip"><svg><use href="#i-sun"/></svg> all but 40&nbsp;min before noon</span>
+    </div>
+
+    <div class="rail">
+      <div class="ev ev--sea"><div class="ev__time">06:45</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Optional dawn swim <span class="ev__tag"><svg class="ev__icn"><use href="#i-wave"/></svg> empty sea</span></p><p class="ev__note">Porto Giunco to yourselves.</p></div></div>
+      <div class="ev"><div class="ev__time">07:45</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Breakfast · fuel up · load the bike</p><p class="ev__note"><b>Full tank leaving Villasimius.</b></p></div></div>
+      <div class="ev"><div class="ev__time">08:30</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Depart — efficient inland route</p><p class="ev__note">Villasimius → Cagliari → SS131 → SS131 DCN north.</p></div></div>
+      <div class="ev"><div class="ev__time">08:30<br>–12:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">The transfer (~230 km)</p><p class="ev__note">~3 h 15 moving + a coffee stop. Done while it's coolest.</p></div></div>
+      <div class="ev ev--sea"><div class="ev__time">12:15</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">San Teodoro — La Cinta</p><p class="ev__note">Huge white beach, umbrella rental, beach bars. (Cala Brandinchi is 5 min away &amp; stunning, but may need a paid ticket — La Cinta is the free sure-thing.)</p></div></div>
+      <div class="heatband"><svg><use href="#i-wave"/></svg><div><b>12:30–17:30 · final beach afternoon</b><span>Swim, lunch, siesta in the shade. The last long, slow sea day.</span></div></div>
+      <div class="ev ev--star"><div class="ev__time">18:30<br>–19:45</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Early aperitivo-dinner in San Teodoro</p><p class="ev__note">Unhurried but with a plan. <b>Top up fuel here too.</b></p></div></div>
+      <div class="ev"><div class="ev__time">20:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Depart for Olbia (~30 km / 40 min)</p></div></div>
+      <div class="ev ev--sun"><div class="ev__time">20:45</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Olbia — Isola Bianca</p><p class="ev__note">Catch the last light over the gulf.</p></div></div>
+      <div class="ev ev--sea"><div class="ev__time">21:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">At the port — vehicle check-in</p><p class="ev__note">Electronic at the dock. Relax at the terminal bar.</p></div></div>
+      <div class="ev ev--star"><div class="ev__time">23:00</div><div class="ev__body"><span class="ev__dot"></span><p class="ev__title">Ferry departs · arrivederci Sardegna 🌙</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============ INFO ============ -->
+  <section class="panel" id="p-in" role="tabpanel" aria-labelledby="tab-in" hidden>
+    <div class="day-head"><h2>Quick reference</h2><p>Alerts, route, and the shortlists — for when you need them.</p></div>
+
+    <div class="callout callout--alert">
+      <svg class="callout__icon"><use href="#i-alert"/></svg>
+      <div>
+        <h3>Punta Molentis is booking-only (2026)</h3>
+        <p>Cap 150 people / 70 vehicles, €10, reserve by <b>midnight the night before</b> at <a href="https://pass.brav.it/Villasimius">pass.brav.it/Villasimius</a>. Motorbikes count against the vehicle cap. Skipping it? <b>Porto Giunco needs no ticket</b> and is arguably prettier for a full day.</p>
+      </div>
+    </div>
+
+    <details class="acc"><summary><svg class="k"><use href="#i-pin"/></svg>Route overview<svg class="caret"><use href="#i-caret"/></svg></summary>
+      <div class="acc__body">
+        <ul class="route">
+          <li><span class="stop">Santa Maria Navarrese</span><span class="leg">Fri AM · SS125 Sarrabus (scenic)</span></li>
+          <li><span class="stop">Cala Pira</span><span class="leg">swim + lunch · 15 min on</span></li>
+          <li class="big"><span class="stop">Villasimius</span><span class="leg">2 nights · beaches + Capo Carbonara</span></li>
+          <li><span class="stop">San Teodoro — La Cinta</span><span class="leg">Sun · fast inland via Cagliari/SS131 (cool hours)</span></li>
+          <li class="big"><span class="stop">Olbia — Isola Bianca</span><span class="leg">Sun 21:00 at port · ferry 23:00</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="acc"><summary><svg class="k"><use href="#i-sun"/></svg>Top 10 not to miss<svg class="caret"><use href="#i-caret"/></svg></summary>
+      <div class="acc__body">
+        <ol class="numlist">
+          <li>The Sarrabus SS125 in the cool morning light</li>
+          <li>Cala Pira — hidden cove, tower, first swim</li>
+          <li>Culurgiones in Ogliastra before you head south</li>
+          <li>Porto Giunco sand + the flamingo lagoon</li>
+          <li>Porto Giunco promontory at golden hour</li>
+          <li>Snorkeling the Capo Carbonara marine reserve</li>
+          <li>Your booked Saturday dinner</li>
+          <li>Aperitivo at sunset over Capo Carbonara</li>
+          <li>A dawn swim on an empty beach</li>
+          <li>La Cinta / Cala Brandinchi as the farewell swim</li>
+        </ol>
+      </div>
+    </details>
+
+    <details class="acc"><summary><svg class="k"><use href="#i-wave"/></svg>Beaches &amp; hidden gems<svg class="caret"><use href="#i-caret"/></svg></summary>
+      <div class="acc__body">
+        <h5>Best beaches</h5>
+        <ul>
+          <li><b>Cala Pira</b> — Day 1 cove, some shade</li>
+          <li><b>Porto Giunco</b> — the icon; go early</li>
+          <li><b>Cala Caterina / Cipolla</b> — shadier afternoon</li>
+          <li><b>La Cinta (San Teodoro)</b> — easy, free, the farewell</li>
+          <li><b>Punta Molentis</b> — stunning <i>if</i> you book</li>
+        </ul>
+        <h5>Hidden gems</h5>
+        <ul>
+          <li>Cala Pira &amp; Cala Sinzias — coves without the crowds</li>
+          <li>Capo Boi coves + Fortezza Vecchia for photos</li>
+          <li>Isola dei Cavoli by boat</li>
+          <li>Anywhere at 7 a.m. — emptiness is the real luxury</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="acc"><summary><svg class="k"><use href="#i-fork"/></svg>Food — book Saturday<svg class="caret"><use href="#i-caret"/></svg></summary>
+      <div class="acc__body">
+        <p>Well-regarded in Villasimius (<b>reserve ahead</b>, check current reviews the week of): <b>La Mora Bianca</b>, <b>Sa Tankitta</b>, <b>Il Giardino di Virgilio e Giorgina</b>.</p>
+        <h5>Dishes to chase</h5>
+        <ul>
+          <li>Culurgiones (Ogliastra, Day 1)</li>
+          <li>Fregola con arselle / vongole</li>
+          <li>Spaghetti alla bottarga</li>
+          <li>Grilled catch of the day</li>
+          <li>Seadas + mirto to finish · gelato daily</li>
+        </ul>
+        <p>Skip the default harbour-front tourist menus — a booked table beats them every time.</p>
+      </div>
+    </details>
+
+    <details class="acc"><summary><svg class="k"><use href="#i-fuel"/></svg>Logistics — parking, fuel, bookings<svg class="caret"><use href="#i-caret"/></svg></summary>
+      <div class="acc__body">
+        <h5>Parking</h5>
+        <p>Beach lots fill early — park <b>in sight of your towel</b>, cover the hot seat, valuables on you. Confirm shaded bike parking at the hotel. At Olbia, follow the vehicle-boarding lane.</p>
+        <h5>Fuel</h5>
+        <p>Fri: fill <b>before the Sarrabus</b>. Sun: full tank leaving Villasimius <b>and</b> top up in San Teodoro, so you board with no errands.</p>
+        <h5>Book (in order)</h5>
+        <ul>
+          <li>Saturday dinner</li>
+          <li>Marine-reserve boat (if Day 2 Option B)</li>
+          <li>Punta Molentis — only if you want it</li>
+          <li>Ferry QR ready on your phone</li>
+          <li>Check if Cala Brandinchi needs a day-ticket</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="acc"><summary><svg class="k"><use href="#i-bag"/></svg>Packing &amp; heat<svg class="caret"><use href="#i-caret"/></svg></summary>
+      <div class="acc__body">
+        <h5>Bring</h5>
+        <ul>
+          <li>Reef-safe sunscreen, after-sun, wide-brim hat, polarised shades</li>
+          <li>Water shoes (rocky coves), quick-dry towel, dry bag</li>
+          <li>2+ L water + electrolyte sachets on the bike</li>
+          <li>Packable umbrella for shadeless coves</li>
+          <li>Bungee cargo net for wet gear</li>
+          <li>Mesh jacket + gloves — abrasion doesn't care about heat</li>
+        </ul>
+        <h5>Heat</h5>
+        <ul>
+          <li>Ride 07:00–11:00; off the bike by midday. <b>Never ride 12:00–16:00.</b></li>
+          <li>Hydrate before you're thirsty; add electrolytes</li>
+          <li>Soak a bandana / neck tube at every stop</li>
+          <li>Siesta guilt-free — the locals do</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="acc"><summary><svg class="k"><use href="#i-alert"/></svg>If weather or crowds change<svg class="caret"><use href="#i-caret"/></svg></summary>
+      <div class="acc__body">
+        <ul>
+          <li><b>Windy / rough sea:</b> switch to sheltered coves — Cala Pira, Cala Caterina, the lee of Capo Carbonara.</li>
+          <li><b>Beaches packed / no parking:</b> don't circle in the heat — pay for a sunbed, or go by boat.</li>
+          <li><b>Punta Molentis booked out:</b> Porto Giunco — no ticket, arguably prettier.</li>
+          <li><b>Too hot midday:</b> long shaded lunch + siesta, swim at 17:00 when the sand cools.</li>
+          <li><b>Sunday running late:</b> cut the San Teodoro afternoon. The ferry is the one thing you can't miss (~2 h buffer built in).</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<footer>
+  <p class="it">Buon viaggio, e buone ultime giornate in Sardegna.</p>
+</footer>
+
+<script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+    var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute('aria-controls')); });
+
+    function select(i, focus) {
+      tabs.forEach(function (t, j) {
+        var on = j === i;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        if (panels[j]) panels[j].hidden = !on;
+      });
+      if (focus) tabs[i].focus();
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(i, false); });
+      t.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          var n = e.key === 'ArrowRight' ? (i + 1) % tabs.length : (i - 1 + tabs.length) % tabs.length;
+          select(n, true);
+        }
+      });
+    });
+  })();
+</script>
